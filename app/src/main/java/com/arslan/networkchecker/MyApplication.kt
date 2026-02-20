@@ -8,6 +8,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        NetworkLog.init(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver)
     }
 }
