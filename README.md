@@ -2,6 +2,10 @@
 
 A minimal Android application designed to test firewall behavior. Its primary purpose is to verify if a firewall application correctly applies rules based on the app's current lifecycle state (foreground vs background).
 
+<p align="center">
+  <img src="assets/screenshots/1.png" width="30%" />
+</p>
+
 ## How it works
 
 The app runs a persistent background service (Foreground Service) that attempts to make an HTTP request every 3 seconds to test actual network connectivity. 
