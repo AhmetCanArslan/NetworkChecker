@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -92,6 +93,8 @@ fun NetworkCheckerScreen(
     onClearLogs: () -> Unit
 ) {
     val logs by NetworkLog.logs.collectAsState()
+    val context = LocalContext.current
+    var selectedIntervalMs by rememberSaveable { mutableStateOf(AppSettings.getCheckIntervalMs(context)) }
 
     Column(
         modifier = modifier
@@ -118,6 +121,14 @@ fun NetworkCheckerScreen(
                 Text("Stop Service")
             }
         }
+
+        IntervalSelector(
+            selectedIntervalMs = selectedIntervalMs,
+            onIntervalSelected = { intervalMs ->
+                selectedIntervalMs = intervalMs
+                AppSettings.setCheckIntervalMs(context, intervalMs)
+            }
+        )
         
         Button(
             onClick = onClearLogs,
@@ -137,6 +148,50 @@ fun NetworkCheckerScreen(
         ) {
             items(logs) { log ->
                 LogItem(log)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntervalSelector(
+    selectedIntervalMs: Long,
+    onIntervalSelected: (Long) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
+        Text(
+            text = "Check interval",
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = { expanded = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(AppSettings.formatIntervalLabel(selectedIntervalMs))
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                AppSettings.intervalOptionsMs.forEach { intervalMs ->
+                    DropdownMenuItem(
+                        text = { Text(AppSettings.formatIntervalLabel(intervalMs)) },
+                        onClick = {
+                            onIntervalSelected(intervalMs)
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
     }

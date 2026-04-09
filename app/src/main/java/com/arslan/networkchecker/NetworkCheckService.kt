@@ -58,7 +58,8 @@ class NetworkCheckService : Service() {
                 val hasInternet = checkNetwork()
                 val isForeground = AppLifecycleObserver.isForeground
                 NetworkLog.addLog(isForeground, hasInternet)
-                delay(3000) // Check every 3 seconds
+                val intervalMs = AppSettings.getCheckIntervalMs(this@NetworkCheckService)
+                delay(intervalMs)
             }
         }
     }
@@ -78,6 +79,9 @@ class NetworkCheckService : Service() {
     }
 
     private fun createNotification(): Notification {
+        val intervalMs = AppSettings.getCheckIntervalMs(this)
+        val intervalLabel = AppSettings.formatIntervalLabel(intervalMs)
+
         val pendingIntent = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java).apply {
                 this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -91,7 +95,7 @@ class NetworkCheckService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Network Checker Running")
-            .setContentText("Checking network connectivity every 3 seconds")
+            .setContentText("Checking network connectivity every $intervalLabel")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .addAction(R.mipmap.ic_launcher, "Stop", stopIntent)
